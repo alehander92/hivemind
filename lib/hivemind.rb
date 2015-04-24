@@ -1,1 +1,2 @@
-require_relative 'hivemind/ast'
+require_relative 'hivemind/universal_ast'
+

@@ -9,18 +9,10 @@ rescue Bundler::BundlerError => e
 end
 require 'rake'
 
-require 'jeweler'
-Jeweler::Tasks.new do |gem|
-  gem.name = "hivemind"
-  gem.homepage = "http://github.com/hivemind-fmi/hivemind"
-  gem.license = "MIT"
-  gem.summary = %Q{A compiler for the hivemind language}
-  gem.description = %Q{A compiler for the hivemind languages with pluggable syntaxes}
-  gem.email = "alehander42@gmail.com"
-  gem.authors = ["Alexander Ivanov"]
-  # dependencies defined in Gemfile
-  gem.files.exclude 'spec/**/*.rb'
-  gem.files.exclude 'tmp'
+require 'rspec/core'
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = FileList['spec/**/*_spec.rb']
 end
 
 task :default => :spec
