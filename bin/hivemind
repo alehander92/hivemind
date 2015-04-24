@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+if ARGV.length > 2
+  filename, syntax = ARGV[0..1]
+else
+  puts 'hivemind <filename> <syntax>'
+end
+
