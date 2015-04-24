@@ -5,4 +5,5 @@ gem 'treetop'
 group :development, :test do
   gem 'bundler'
   gem 'rspec'
+  gem 'skeptic'
 end
