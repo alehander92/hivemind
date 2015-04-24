@@ -14,3 +14,9 @@ application/logs/*.php
 /attach/
 /application/cache/_bancha/*.css
 /application/cache/_bancha/*.js
+
+Gemfile.lock
+*.pyc
+*.doc
+*.txt
+
