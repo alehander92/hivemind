@@ -16,6 +16,14 @@ module Hivemind
       def initialize(label, parent = nil, methods = {})
       	@labels, @parent, @methods = label, parent, methods
       end
+
+      def define_hivemind_method(label, &handler)
+        @methods[label] = handler
+      end
+    end
+
+    def hivemind_string(value)
+      HivemindEnv[:Object].new({_value: value}, HivemindEnv[:String])
     end
 
     HivemindEnv = Environment.new(nil, 
@@ -27,6 +35,18 @@ module Hivemind
     HivemindEnv[:Number] = HivemindClass.new('Number', HivemindEnv[:Object])
     HivemindEnv[:Boolean] = HivemindClass.new('Boolean', HivemindEnv[:Object])
     HivemindEnv[:@true] = HivemindObject.new({}, HivemindEnv[:Boolean])
+
+    HivemindEnv[:Object].define_hivemind_method(:display) do |hivemind_self, *args, env|
+      p hivemind_self.call(hivemind_self.klass.methods[:'to-string'], *args, env).data[:_value]
+    end
+
+    HivemindEnv[:Object].define_hivemind_method(:'to-string') do |hivemind_self, *args, env|
+      if [HivemindEnv[:Number], HivemindEnv[:String], HivemindEnv[:Boolean]].include? hivemind_self.klass
+        hivemind_string(hivemind_self.data[:_value])
+      else
+        'object'
+      end
+    end
   end
 end
 

@@ -12,6 +12,22 @@ module Hivemind
     end
   end
 
+  class Runtime::HivemindClass
+    def call(function, args, env)
+      if function.is_a?(UniversalAST::Function)
+        args_values = {:self => self}
+        function.args.zip(args) do |label, arg|
+          args_values[label] = arg
+        end
+        body_env = Environment.new(env, args_values)
+        function.body.map { |expr| expr.run(body_env) }[-1] || env.top[:@nil]
+      else
+        function.call self, *args, env
+      end
+    end
+  end
+
+    
   module UniversalAST
     class If
       def run(env)
@@ -31,7 +47,13 @@ module Hivemind
 
     class Attribute
       def run(env)
-        @object.run(env).data[@label.value]
+        obj = @object.run(env)
+        if obj.respond_to?(:data) 
+          obj.data[@label.value]
+        else
+          env[:current_class] = obj
+          obj.methods[@label.value]
+        end
       end
     end
 
@@ -43,13 +65,8 @@ module Hivemind
 
     class Call
       def run(env)
-        args_values = {}
         function = @function.run(env)
-        function.args.zip(@args) do |label, arg|
-          args_values[label] = arg
-        end
-        body_env = Environment.new(env, args_values)
-        function.body.map { |expr| expr.run(body_env) }[-1] || env.top[:@nil]
+        env[:current_class].call(function, @args, env)
       end
     end
 
@@ -71,7 +88,7 @@ module Hivemind
 
     class Value
       def run(env)
-        p env.values
+        p env
         Runtime::HivemindObject.new({_value: @value}, env.top[self.class.name.to_sym])
       end
     end

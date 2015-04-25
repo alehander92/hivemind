@@ -1,7 +1,14 @@
 #!/usr/bin/env ruby
 
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+
+require 'hivemind'
+
 if ARGV.length > 2
   filename, syntax = ARGV[0..1]
+  tree = Hivemind::Parser.parse(File.read(filename))
+  vm = Hivemind::VM.new(tree)
+  vm.run Hivemind::Runtime::HivemindEnv
 else
   puts 'hivemind <filename> <syntax>'
 end
