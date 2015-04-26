@@ -1,0 +1,27 @@
+#if_statement
+if <test>:
+    <true_branch>
+else:
+    <else_branch>
+
+#assign
+<left> = <right>
+
+#call
+<function>(<<args:', '>>)
+
+#list
+[<<elements:', '>>]
+
+#method_statement
+method <method_name>(<<args:', '>>):
+    <<body>>
+
+#class_statement
+class <class_name>:
+    <<methods>>
+
+#module_statement
+module <module_name>:
+    <<elements>>
+

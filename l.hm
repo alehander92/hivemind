@@ -1,0 +1,6 @@
+(class Rectangle
+    (method area (s)
+        2))
+
+ (method start (self)
+     4)
