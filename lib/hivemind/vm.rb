@@ -50,7 +50,7 @@ module Hivemind
           module_statement.elements[@statement.is_a?(ModuleStatement) ? @statement.module_name : @statement.class_name] =
             statement.run(env)
         end
-        env[]
+        env
       end
     end
 
