@@ -10,6 +10,15 @@ else:
 #call
 <function>(<<args:', '>>)
 
+#attribute
+<object>.<label>
+
+#attribute_assign
+<object>.<label> = <right>
+
+#binary
+<left> <operation> <right>
+
 #list
 [<<elements:', '>>]
 
@@ -19,7 +28,7 @@ method <method_name>(<<args:', '>>):
 
 #class_statement
 class <class_name>:
-    <<methods>>
+    <<methods:''>>
 
 #module_statement
 module <module_name>:

@@ -1,0 +1,10 @@
+class Rectangle {
+        method area(s) {
+    2.0
+}}
+
+class Object {
+        method start(self) {
+    4.0
+}}
+

@@ -4,11 +4,26 @@
     <else_branch>)
 
 #assign
-(assign <left> <right>)
+(define <left> <right>)
 
 #method_statement
 (method <method_name> (<<args:' '>>)
     <<body>>)
+
+#attribute
+<object>.<label>
+
+#attribute_assign
+(update <object>.<label> <right>)
+
+#binary
+(<operation> <left> <right>)
+
+#call
+(! <function> <<args:' '>>)
+
+#list
+_(<<elements:' '>>)
 
 #class_statement
 (class <class_name>

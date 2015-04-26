@@ -40,16 +40,28 @@ module Hivemind
     },
 
     attribute: {
-      object: :expr,
-      label: :name
+      object: :expr_no_attr,
+      label: :name_or_attr
     },
 
     image: {
-      statement: :statement
+      statements: :class_statement
+    },
+
+    binary: {
+      left: :expr_no_binary,
+      operation: :operation,
+      right: :expr
+    },
+
+    attribute_assign: {
+      object: :expr_no_attr,
+      label: :name_or_attr,
+      right: :expr
     },
 
     call: {
-      function: :expr,
+      function: :expr_no_call,
       args: :expr
     },
 
@@ -101,7 +113,7 @@ module Hivemind
     def generate
       # parse grammar
       # combine into base grammar
-      rules = load_rules(@grammar_source)
+      rules = self.class.load_rules(@grammar_source)
       refs = {}
 
       rules.each do |name, rule|
@@ -211,13 +223,11 @@ module Hivemind
           parsers << Lit.new(token)
         end
       end
-      parsers.map { |pa| puts pa.inspect }
+      # parsers.map { |pa| puts pa.inspect }
       parsers.reduce(:&)
     end
 
-
-          
-    def load_rules(grammar)
+    def self.load_rules(grammar)
       lines = grammar.split("\n")
       rules = {}
       current_rule = nil
@@ -248,33 +258,45 @@ module Hivemind
   List = UniversalAST::List
   Dictionary = UniversalAST::Dictionary
   Pair = UniversalAST::Pair
+  Attribute = UniversalAST::Attribute
+  AttributeAssign = UniversalAST::AttributeAssign
   IfStatement = UniversalAST::IfStatement
   MethodStatement = UniversalAST::MethodStatement
   ClassStatement = UniversalAST::ClassStatement
   Image = UniversalAST::Image
+  Operation = UniversalAST::Operation
+  Float = UniversalAST::Float
+  Int = UniversalAST::Int
 
   REFS = {
     name: Apply.new(Mat.new(/[a-zA-Z][a-zA-Z_]*/)) do |result|
       Name.new(result.to_sym)
     end,
     
-    image: Apply.new(Join.new(Ref.new(:statement), "", as: :statements)) do |children|
-      d = children.select { |child| child.is_a?(MethodStatement) }
+    image: Apply.new(Join.new(Ref.new(:class_statement), "", as: :statements)) do |children|
+      # d = children.select { |child| child.is_a?(MethodStatement) }
       e = children.select { |child| child.is_a?(ClassStatement) }
-      obj = e.find { |element| element.is_a?(ClassStatement) && element.class_name == :Object }
-      if obj.nil? && !d.empty?
-        obj = ClassStatement.new(Name.new(:Object), d)
-        e << obj
-      elsif obj
-        obj.methods += d
-      end
+      # obj = e.find { |element| element.is_a?(ClassStatement) && element.class_name == :Object }
+      # p e[0].class_name
+      # if obj.nil? && !d.empty?
+      #   obj = ClassStatement.new(Name.new(:Object), d)
+      #   e << obj
+      # elsif obj
+      #   obj.methods += d
+      # end
       Image.new(e)
     end,
 
     statement: Ref.new(:module_statement) | Ref.new(:class_statement) | Ref.new(:method_statement), 
 
-    number: Apply.new(Mat.new(/[0-9]+(\.[0-9]+)?/)) do |result|
-      Number.new(result.to_f)
+    number: Ref.new(:float) | Ref.new(:int),
+
+    float: Apply.new(Mat.new(/[0-9]+\.[0-9]+/)) do |result|
+      Float.new(result.to_f)
+    end,
+
+    int: Apply.new(Mat.new(/[0-9]+/)) do |result|
+      Int.new(result.to_i)
     end,
 
     string: Apply.new(Mat.new(/\"[^\"]*\"/)) do |result|
@@ -289,10 +311,22 @@ module Hivemind
 
     dedent: Lit.new(''),
 
-    expr: Ref.new(:number) | Ref.new(:name),
+    expr: Ref.new(:attribute_assign) | Ref.new(:assign) | Ref.new(:binary) | Ref.new(:call) | Ref.new(:attribute) | Ref.new(:number) | Ref.new(:name) | Ref.new(:string),
+
+    expr_no_attr: Ref.new(:number) | Ref.new(:nil) | Ref.new(:name) | Ref.new(:string),
+
+    expr_no_call: Ref.new(:binary) | Ref.new(:attribute) | Ref.new(:number) | Ref.new(:name) | Ref.new(:string),
+
+    nil: Lit.new('nil'),
+
+    name_or_attr: Ref.new(:name) | Ref.new(:attribute), 
 
     assign: Apply.new(Ref.new(:_assign)) do |results|
       Assign.new(*results.select { |r| r.is_a?(Element) })
+    end,
+
+    attribute_assign: Apply.new(Ref.new(:_attribute_assign)) do |results|
+      AttributeAssign.new(*results.select { |r| r.is_a?(Element) })
     end,
 
     call: Apply.new(Ref.new(:_call)) do |results|
@@ -312,6 +346,22 @@ module Hivemind
       key, value = results.select { |r| r.is_a?(Element) }
       Pair.new(key, value)
     end,
+
+    binary: Apply.new(Ref.new(:_binary)) do |results|
+      left, _, operation, _, right = results
+      UniversalAST::Binary.new(left, operation, right)
+    end,
+
+    expr_no_binary: Ref.new(:attribute) | Ref.new(:number) | Ref.new(:name) | Ref.new(:string),
+
+    operation: Apply.new(Lit.new('+') | Lit.new('-') | Lit.new('**') | Lit.new('/') | Lit.new('*') | Lit.new('||')) do |result|
+      Operation.new(result)
+    end, 
+
+    attribute: Apply.new(Ref.new(:_attribute)) do |results|
+      object, label = results.select { |r| r.is_a?(Element) }
+      Attribute.new(object, label)
+    end, 
 
     if_statement: Apply.new(Ref.new(:_if_statement)) do |results|
       test, true_branch, else_branch = results.select { |r| r.is_a?(Element) || r.is_a?(Array) }

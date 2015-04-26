@@ -1,0 +1,34 @@
+#if_statement
+<test> O RLY
+    YA RLY
+    <<true_branch>>
+    NO WAI
+    <<else_branch>>
+
+
+#assign
+DO <left> <right>
+
+#method_statement
+HOW DUZ I <method_name>(<<args:' '>>)
+    <<body>>
+IF U SAY SO
+
+#attribute
+<object> HEY <label>
+
+#attribute_assign
+<object> BE <label> <right>
+
+#call
+GIMME <function> (<<args:' '>>)
+
+#class_statement
+TOM SAYS <class_name>
+    <<methods>>
+LOVE
+
+#module_statement
+HAI <module_name>
+    <<elements>>
+KTHXBYE

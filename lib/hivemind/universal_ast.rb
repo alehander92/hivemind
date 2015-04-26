@@ -53,6 +53,10 @@ module Hivemind
       # <object>.<label> = <right>
 
       fields :object, :label, :right
+
+      def render(depth = 0)
+        "#{offset(depth)}AttributeAssign : #{@object.render} #{@label.render} #{@right.render}"
+      end
     end
 
     class Call < Element
@@ -69,12 +73,26 @@ module Hivemind
       # [el1, el2..]
 
       fields :elements
+
+      def render(depth = 0)
+        "#{offset(depth)}List\n#{@elements.map { |e| e.render(depth + 1) }.join("\n")}"
+      end
     end
 
     class Dictionary < Element
       # {key1: val1, key2: val2..}
 
       fields :pairs
+    end
+
+    class Binary < Element
+      # <left> <operation> <right>
+
+      fields :left, :operation, :right
+
+      def render(depth = 0)
+        "#{offset(depth)}Binary #{@left.render} #{@operation.value} #{@right.render}"
+      end
     end
 
     class MethodStatement < Element
@@ -116,6 +134,15 @@ module Hivemind
     end
 
     class Number < Value
+    end
+
+    class Int < Number
+    end
+
+    class Float < Number
+    end
+
+    class Operation < Value
     end
 
     class ModuleStatement < Element

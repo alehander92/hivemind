@@ -4,15 +4,27 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'hivemind'
 
-if ARGV.length > 1
+def astify(source, syntax)
+  parser, refs = Hivemind::Syntax.generate_syntax(syntax)
+  success, tree, _ = parser.parse(source, refs)
+  tree
+end
+
+if ARGV.length == 2
   filename, syntax = ARGV[0..1]
-  parser, refs = Hivemind::Syntax.generate_syntax(File.read(syntax))
-  success, tree, _ = parser.parse(File.read(filename), refs)
+  tree = astify(File.read(filename), File.read(syntax))
   puts tree.render
   vm = Hivemind::VM.new(tree)
   result = vm.run Hivemind::Runtime::HivemindEnv
-  p result
+  # p result
+elsif ARGV.length == 5
+  filename, first, second, save = ARGV[1..4]
+  g = File.read(first)
+  tree = astify(File.read(filename), g)
+  result = Hivemind::Renderer.new(tree, File.read(second)).render
+  File.write(save, result)
 else
   puts 'hivemind <filename> <syntax>'
+  puts 'hivemind render <filename> <first> <second> <save>'
 end
 

@@ -117,7 +117,6 @@ class Join < Combinator
     results = []
     while success
       success, result, remaining = @parser.parse(remaining, refs)
-      p input, 'xx', @parser
       
       results.push(result) if success
       if success
@@ -137,7 +136,6 @@ class Ref < Combinator
   end
 
   def parse(input, refs)
-    puts "r #{@label}", input
     ref_parser = refs[@label.to_sym]
     ref_parser.parse(input, refs)
   end

@@ -12,14 +12,14 @@ module Hivemind
     end
   end
 
-  class Runtime::HivemindClass
+  class Runtime::HivemindObject
     def call(function, args, env)
-      if function.is_a?(UniversalAST::Function)
+      if function.is_a?(UniversalAST::MethodStatement)
         args_values = {:self => self}
-        function.args.zip(args) do |label, arg|
-          args_values[label] = arg
+        function.args[1..-1].zip(args) do |label, arg|
+          args_values[label.value.to_sym] = arg
         end
-        body_env = Environment.new(env, args_values)
+        body_env = Environment.new(env, **args_values)
         function.body.map { |expr| expr.run(body_env) }[-1] || env.top[:@nil]
       else
         function.call self, *args, env
@@ -27,6 +27,23 @@ module Hivemind
     end
   end
 
+  class Runtime::HivemindClass
+    def call(function, args, env)
+      h = Runtime::HivemindObject.new({}, self)
+      function = dispatch_method(:init)
+      if function.is_a?(UniversalAST::MethodStatement)
+        args_values = {:self => h}
+        function.args[1..-1].zip(args) do |label, arg|
+          args_values[label.value.to_sym] = arg
+        end
+        body_env = Environment.new(env, **args_values)
+        function.body.map { |expr| expr.run(body_env) }[-1] || env.top[:@nil]
+      else
+        function.call h, *args, env
+      end
+      h
+    end
+  end
     
   module UniversalAST
     class Image
@@ -34,9 +51,10 @@ module Hivemind
         @statements.each do |statement|
           statement.run(env)
         end
-        puts env.top[:Object].methods.keys
+        # puts env.top[:Object].methods.keys
         if env.top[:Object].methods.key? :start
-          env.top[:Object].call(env.top[:Object].methods[:start], [env.top[:Object].new], env)
+          weird_object = Runtime::hivemind_object({})
+          weird_object.call(env.top[:Object].methods[:start], [], env)
         else
           env.top[:@nil]
         end
@@ -73,10 +91,20 @@ module Hivemind
     class Attribute
       def run(env)
         obj = @object.run(env)
+        env.current_self = obj
+
         if obj.respond_to?(:data) 
-          obj.data[@label.value]
+          if obj.data.key? @label.value
+            obj.data[@label.value]
+          else
+            method = obj.klass.dispatch_method(@label.value)
+            if method
+              method
+            else
+              raise HivemindAccessError.new("No #{@label.value} in obj")
+            end
+          end
         else
-          env[:current_class] = obj
           obj.methods[@label.value]
         end
       end
@@ -90,8 +118,24 @@ module Hivemind
 
     class Call
       def run(env)
-        function = @function.run(env)
-        env[:current_class].call(function, @args, env)
+        if !@function.is_a?(Attribute)
+          function = @function.run(env)
+          env.current_self.call(function, @args.map { |arg| arg.run(env) }, env)
+        elsif @function.label.value != :new
+          obj = @function.object.run(env)
+          function = obj.klass.dispatch_method(@function.label.value)
+          obj.call(function, @args.map { |arg| arg.run(env) }, env)
+        else
+          obj = @function.object.run(env)
+          function == obj.dispatch_method(:init)
+          obj.call(function, @args.map { |arg| arg.run(env) }, env)
+        end
+      end
+    end
+
+    class Binary
+      def run(env)
+        Runtime::hivemind_numbr(@left.run(env).data[:_value].send(@operation.value, @right.run(env).data[:_value]))
       end
     end
 
@@ -113,18 +157,17 @@ module Hivemind
 
     class Value
       def run(env)
-        p env
-        Runtime::HivemindObject.new({_value: @value}, env.top[self.class.name.to_sym])
+        Runtime::HivemindObject.new({_value: @value}, env.top[self.class.name.split('::').last.to_sym])
       end
     end
 
     class ClassStatement
       def run(env)
-        definition = Runtime::HivemindClass.new(@class_name, {})
+        definition = env.fetch(@class_name.value) || Runtime::HivemindClass.new(@class_name.value, env.top[:Object], {})
         @methods.each do |method|
-          definition.methods[method.method_name] = method
+          definition.methods[method.method_name.value] = method
         end
-        env[@class_name] = definition
+        env[@class_name.value] = definition
       end
     end
 

@@ -1,0 +1,13 @@
+(class Rectangle
+        (method init (self a b)
+        (update self.a a)
+    (update self.b b)))
+
+(class Object
+        (method area (self)
+        (self.a self.b))
+
+    (method start (self)
+        (define e (! Rectangle.new 2 4))
+    (! e.area )))
+

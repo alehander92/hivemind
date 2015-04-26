@@ -1,6 +1,24 @@
 class Rectangle:
-    method area(s):
-        2
+    method init(self, a, b):
+        self.a = a
+        self.b = b
 
-method start(self):
-    4
+    method area(self):
+        self.a * self.b
+
+class Circle:
+    method init(self, r):
+        self.r = r
+
+    method area(self):
+        3.14 * self.r * self.r
+
+class Object:
+    method start(self):
+        e = Rectangle.new(2, 4)
+        f = e.area()
+        f.display()
+        c = Circle.new(4)
+        g = c.area()
+        g.display()
+
