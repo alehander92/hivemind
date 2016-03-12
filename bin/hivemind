@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'hivemind'
 
-SYNTAXES_PATH = File.join(File.dirname(__FILE__), '..', 'syntaxes')
+SYNTAXES_PATH = File.join(File.expand_path(File.join(File.dirname(__FILE__), '..')), 'syntaxes')
 
 def astify(source, syntax)
   parser, refs = Hivemind::Syntax.generate_syntax(syntax)
