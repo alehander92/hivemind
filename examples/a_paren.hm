@@ -1,0 +1,9 @@
+syntax: paren
+
+(class Rectangle
+    (method init (self a b)
+        (update self.a a)
+        (update self.b b))
+
+    (method area (self)
+        (* self.a self.b)))

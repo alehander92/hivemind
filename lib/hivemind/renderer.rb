@@ -45,7 +45,7 @@ module Hivemind
     def render_element(element, depth = 0)
       rule = @rules[element.class.name.split('::').last.downcase.gsub('attributeassign', 'attribute_assign').gsub('statement', '_statement').to_sym]
       depth += 1 if element.class.name.end_with?('MethodStatement')
-      p "for #{element.class.name.split('::').last.downcase.gsub('statement', '_statement').to_sym} #{depth}"
+      # p "for #{element.class.name.split('::').last.downcase.gsub('statement', '_statement').to_sym} #{depth}"
       offset(depth) + if rule.is_a?(String)
         render_template rule, element, depth
       elsif rule.is_a?(Proc)
@@ -57,7 +57,7 @@ module Hivemind
       plan = plan.gsub(/\<\<([a-zA-Z_]+)\:'([^\']*)'\>\>/) do
         element.send(Regexp.last_match[1]).map(&method(:render_element)).join(Regexp.last_match[2])
       end
-      p plan
+      # p plan
       plan = plan.gsub(/\<\<([a-zA-Z_]+)\>\>/) do
         element.send(Regexp.last_match[1]).map { |e| render_element(e, depth) }.join("\n")
       end

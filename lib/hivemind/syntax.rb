@@ -348,7 +348,19 @@ module Hivemind
     end,
 
     binary: Apply.new(Ref.new(:_binary)) do |results|
-      left, _, operation, _, right = results
+      if results[0].is_a?(String)
+        results = results[1..-1]
+      end
+      # detect operation intelligently
+      tokens = results[0], results[2], results[4]      
+      if tokens[0].is_a?(UniversalAST::Operation)
+        operation, left, right = tokens
+      elsif tokens[1].is_a?(UniversalAST::Operation)
+        left, operation, right = tokens
+      else
+        left, right, operation = tokens
+      end
+      # p results
       UniversalAST::Binary.new(left, operation, right)
     end,
 
@@ -369,7 +381,7 @@ module Hivemind
     end,
 
     method_statement: Apply.new(Ref.new(:_method_statement)) do |results|
-      method_name, args, body = results.select { |r| r.is_a?(Element) || r.is_a?(Array) }      
+      method_name, args, body = results.select { |r| r.is_a?(Element) || r.is_a?(Array) }
       MethodStatement.new(method_name, args, body)
     end,
     

@@ -64,12 +64,15 @@ module Hivemind
     HivemindEnv[:@nil] = HivemindObject.new({}, HivemindEnv[:NilClass])
 
     HivemindEnv[:Object].define_hivemind_method(:display) do |hivemind_self, *args, env|
-      p hivemind_self.call(hivemind_self.klass.dispatch_method(:to_string), args, env).data[:_value]
+      puts hivemind_self.call(hivemind_self.klass.dispatch_method(:to_string), args, env).data[:_value]
     end
 
     HivemindEnv[:Object].define_hivemind_method(:to_string) do |hivemind_self, *args, env|
+      # p hivemind_self
       if [HivemindEnv[:Int], HivemindEnv[:Float], HivemindEnv[:String], HivemindEnv[:Boolean]].include? hivemind_self.klass
         hivemind_string(hivemind_self.data[:_value])
+      elsif hivemind_self.klass == HivemindEnv[:NilClass]
+        hivemind_string('null')
       else
         y = ''
         i = 0

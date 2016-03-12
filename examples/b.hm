@@ -1,0 +1,9 @@
+syntax: pythonic
+
+class Rectangle:
+    method init(self, a, b):
+        self.a = a
+        self.b = b
+
+    method area(self):
+        self.a * self.b

@@ -1,0 +1,26 @@
+syntax: paren
+
+(class Rectangle
+        (method init (self a b)
+        (update self.a a)
+    (update self.b b))
+
+    (method area (self)
+        (* self.a self.b)))
+
+(class Circle
+        (method init (self r)
+        (update self.r r))
+
+    (method area (self)
+        (* 3.14 (* self.r self.r))))
+
+(class Object
+        (method start (self)
+        (define e (! Rectangle.new 2 4))
+    (define f (! e.area ))
+    (! f.display )
+    (define c (! Circle.new 4))
+    (define g (! c.area ))
+    (! g.display )))
+

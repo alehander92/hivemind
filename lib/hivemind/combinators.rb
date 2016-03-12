@@ -109,6 +109,7 @@ class Join < Combinator
     @separator = separator
     @as = as.to_sym
     @separator_parser = Lit.new(@separator) & Mat.new(/ */) #workaround hivemind
+    @@depth ||= 0
   end
 
   def parse(input, refs)
@@ -116,10 +117,21 @@ class Join < Combinator
     remaining = input
     results = []
     while success
+      # puts "#{'  ' * @@depth}BEFORE " + @parser.label.to_s
+      # p ["  " * @@depth, remaining]
+
+      # @@depth += 1
       success, result, remaining = @parser.parse(remaining, refs)
-      
+      # @@depth -= 1
+      # puts "#{'  ' * @@depth}AFTER " + @parser.label.to_s
+      # p ["  " * @@depth, success, remaining, results.length]
+      # puts
+
       results.push(result) if success
       if success
+        if remaining.start_with? '    (' # fix later
+          remaining = "\n#{remaining}"
+        end
         success, result, remaining = @separator_parser.parse(remaining, refs)
       end
     end
@@ -188,4 +200,3 @@ end
 def match(regex)
   Match.new(regex)
 end
-  
