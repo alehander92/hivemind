@@ -106,7 +106,9 @@ _(<<elements:' '>>)
 
 # Installation
 
+```
 gem install hivemind
+```
 
 # Usage
 
@@ -132,6 +134,9 @@ hivemind render a.hm pythonic a2.hm
 
 The core language is just a simple python/ruby-like language for now.
 
+# History
+
+Created for the HackFMI 5
 
 # Future development
 
