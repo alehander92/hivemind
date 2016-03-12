@@ -12,12 +12,11 @@ module Hivemind
       end
     end
     
-    describe Module do
+    describe ModuleStatement do
       it 'is initialized with an elements attribute' do
-        mod = Module.new([])
+        mod = ModuleStatement.new('ha', [])
         expect(mod.elements).to eq([])
       end
     end
   end
-
 end
