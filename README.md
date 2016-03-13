@@ -16,8 +16,11 @@ The concept of "syntax" for hivemind is similar to
 Syntaxes are defined using code-like examples for core ast nodes and they act in a bidirectional way:
   * they are used to parse source code using that syntax
   * and to render code in that syntax
+  * **source in each syntax is automatically transltable to another syntax**
 
-They look like that:
+Tools for the language would also support representations of source grouped by class or methods or as a graph 
+
+Syntaxes look like that:
 
 A pythonic syntax:
 
@@ -130,9 +133,11 @@ hivemind render a.hm pythonic a2.hm
 * Use different sub-language seamlessly across the same codebase
 * A possible solution for the expression problem (just convert between different representations)
 
+
 # Language
 
 The core language is just a simple python/ruby-like language for now.
+
 
 # History
 
